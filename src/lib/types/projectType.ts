@@ -1,10 +1,9 @@
 export interface ProjectData {
-  id: string;
   name: string;
-  icon: string;
+  icon: 'react' | 'vue' | 'angular' | 'svelte';
   shortDescription: string;
   githubUrl: string;
   readmeUrl: string;
   technologies: string[];
-  type: string;
-  }
+  type: 'application' | 'library';
+}

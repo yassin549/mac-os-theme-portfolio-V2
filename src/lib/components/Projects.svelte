@@ -7,7 +7,9 @@
   import SvelteMarkdown from 'svelte-markdown';
   import CodeBlockWrapper from './CodeBlockWrapper.svelte';
   import ProjectIcons from './ProjectIcons.svelte';
+  import ProjectActions from './ProjectActions.svelte';
   import { getTagColor, getTypeColor } from '../utils/tagColors';
+  import { fade, fly, slide } from 'svelte/transition';
   import 'github-markdown-css/github-markdown-light.css';
 
   export let startDrag: (e: MouseEvent, id: string, action: 'move' | 'resize') => void;
@@ -16,110 +18,155 @@
   let selectedProject: ProjectData | null = null;
   let readmeContent: string = '';
   let isLoading: boolean = false;
+  let searchQuery: string = '';
+  let filteredProjects: ProjectData[] = [];
+  let searchInputRef: HTMLInputElement;
+
+  $: {
+    const projectsList = Object.values($projects);
+    filteredProjects = projectsList.filter(project => 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.technologies.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }
 
   onMount(() => {
-    if ($projects.length > 0) {
-      selectProject($projects[0]);
+    const projectsList = Object.values($projects);
+    if (projectsList.length > 0) {
+      selectProject(projectsList[0]);
     }
+    // Focus search input
+    if (searchInputRef) searchInputRef.focus();
   });
 
   async function selectProject(project: ProjectData) {
-    selectedProject = project;
     isLoading = true;
+    selectedProject = project;
     try {
       const response = await fetch(project.readmeUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       readmeContent = await response.text();
+      if (!readmeContent.trim()) {
+        throw new Error('Empty content received');
+      }
     } catch (error) {
       console.error('Failed to fetch README:', error);
-      readmeContent = 'Failed to load README content.';
+      readmeContent = `# Error Loading Project Details\n\nUnable to load project details. This could be due to:\n\n- Network connectivity issues\n- File not found\n- Server configuration\n\nPlease try again later or contact the administrator.`;
     } finally {
       isLoading = false;
-    }
-  }
-
-  function openProjectLink(url: string) {
-    if (typeof globalThis !== 'undefined') {
-      globalThis.window.open(url, '_blank');
     }
   }
 
   const renderers = {
     code: CodeBlockWrapper
   };
-
 </script>
 
 <div class="bg-white h-full rounded-lg flex flex-col overflow-hidden font-sans">
   <!-- Projects Header -->
-  <div class="bg-gray-100 px-2 py-2 flex items-center cursor-move border-b border-gray-200" on:mousedown={(e) => startDrag(e, window.id, "move")}>
+  <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-3 py-2 flex items-center cursor-move border-b border-gray-200" 
+       on:mousedown={(e) => startDrag(e, window.id, "move")}>
     <div class="flex space-x-2 mr-4">
-      <button class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 focus:outline-none" on:click={() => closeWindow(window.id)}>
-        <svg class="w-3 h-3 text-red-800 opacity-0 hover:opacity-100" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <button class="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600 focus:outline-none transition-colors duration-200" 
+              on:click={() => closeWindow(window.id)}>
+        <svg class="w-3 h-3 text-red-800 opacity-0 hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <button class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 focus:outline-none" on:click={() => toggleMinimize(window.id)}>
-        <svg class="w-3 h-3 text-yellow-800 opacity-0 hover:opacity-100" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <button class="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600 focus:outline-none transition-colors duration-200" 
+              on:click={() => toggleMinimize(window.id)}>
+        <svg class="w-3 h-3 text-yellow-800 opacity-0 hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M20 12H4" />
         </svg>
       </button>
-      <button class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 focus:outline-none" on:click={() => toggleMaximize(window.id)}>
-        <svg class="w-3 h-3 text-green-800 opacity-0 hover:opacity-100" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <button class="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600 focus:outline-none transition-colors duration-200" 
+              on:click={() => toggleMaximize(window.id)}>
+        <svg class="w-3 h-3 text-green-800 opacity-0 hover:opacity-100 transition-opacity duration-200" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path d="M8 3v3a2 2 0 01-2 2H3m18 0h-3a2 2 0 01-2-2V3m0 18v-3a2 2 0 012-2h3M3 16h3a2 2 0 012 2v3" />
         </svg>
       </button>
     </div>
-    <div class="flex-grow text-center font-semibold">Projects</div>
+    <div class="flex-grow text-center font-semibold text-gray-700">Projects</div>
   </div>
 
   <div class="flex-grow flex overflow-hidden">
-    <div class="w-80 border-r border-gray-200 overflow-y-auto bg-gray-50">
-      {#each $projects as project,index}
-        <div 
-          class="p-4 hover:bg-gray-100 cursor-pointer transition-colors duration-200 {selectedProject === project ? 'bg-blue-100 border-l-2 border-blue-500' : ''}"
-          on:click={() => selectProject(project)}
-        >
-          <div class="flex items-center mb-2">
-            <div class="w-6 h-6 mr-2 text-gray-600">
-              <ProjectIcons iconName={project.icon} />
-            </div>
-            <h3 class="font-semibold flex-grow text-gray-800 truncate">{project.name}</h3>
-            <button 
-              class="text-gray-500 hover:text-gray-700 transition-colors duration-200"
-              on:click|stopPropagation={() => openProjectLink(project.githubUrl)}
-            >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </button>
-          </div>
-          <p class="text-sm text-gray-600 mb-2 line-clamp-2">{project.shortDescription}</p>
-          <div class="flex flex-wrap gap-1 mt-2">
-            <span class="px-2 py-1 text-xs font-medium rounded-full capitalize {getTypeColor(project.type)}">
-              {project.type}
-            </span>
-            {#each project.technologies as tech}
-              <span class="px-2 py-1 text-xs font-medium rounded-full {getTagColor(tech)}">
-                {tech}
-              </span>
-            {/each}
-          </div>
+    <!-- Project List Sidebar -->
+    <div class="w-80 flex flex-col border-r border-gray-200 bg-gray-50">
+      <!-- Search Bar -->
+      <div class="p-4">
+        <div class="relative">
+          <input
+            bind:this={searchInputRef}
+            type="text"
+            bind:value={searchQuery}
+            placeholder="Search projects..."
+            class="w-full px-4 py-2.5 pl-11 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
+          />
+          <svg class="w-5 h-5 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-        {#if index < $projects.length - 1}
-          <hr class="border-gray-300" />
-        {/if}
-      {/each}
+      </div>
+
+      <!-- Project List -->
+      <div class="flex-1 overflow-y-auto px-2">
+        {#each filteredProjects as project (project.name)}
+          <div 
+            class="group relative p-4 hover:bg-white cursor-pointer transition-all duration-200 rounded-xl mb-2 {selectedProject === project ? 'bg-white shadow-sm ring-1 ring-gray-200' : 'hover:shadow-sm'}"
+            on:click={() => selectProject(project)}
+            in:fly={{ y: 20, duration: 200 }}
+            out:fade
+          >
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 mr-3 text-gray-600 bg-gray-100 rounded-xl p-2 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all duration-200 flex items-center justify-center">
+                <ProjectIcons iconName={project.icon} />
+              </div>
+              <h3 class="font-semibold flex-grow text-gray-800 group-hover:text-blue-600 transition-colors duration-200">{project.name}</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-3 line-clamp-2 group-hover:text-gray-800 transition-colors duration-200">{project.shortDescription}</p>
+            <div class="flex flex-wrap gap-1.5">
+              {#each project.technologies.slice(0, 3) as tech}
+                <span class="px-2 py-1 text-xs rounded-md font-medium transition-all duration-200 {getTagColor(tech)} opacity-80 group-hover:opacity-100">{tech}</span>
+              {/each}
+              {#if project.technologies.length > 3}
+                <span class="px-2 py-1 text-xs rounded-md font-medium bg-gray-100 text-gray-600">+{project.technologies.length - 3}</span>
+              {/if}
+            </div>
+          </div>
+        {/each}
+      </div>
     </div>
 
+    <!-- Project Details -->
     <div class="flex-1 overflow-hidden flex flex-col bg-white">
       {#if selectedProject}
         <div class="overflow-y-auto flex-grow">
           {#if isLoading}
             <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+              <div class="relative">
+                <div class="w-12 h-12 rounded-full border-t-2 border-b-2 border-blue-500 animate-spin"></div>
+                <div class="w-12 h-12 rounded-full border-t-2 border-b-2 border-blue-300 animate-spin absolute top-0 left-0" style="animation-delay: -0.3s"></div>
+              </div>
             </div>
           {:else}
-            <div class="markdown-body prose prose-sm max-w-none">
+            <div class="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+              <div class="p-4">
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-12 h-12 rounded-xl bg-gray-100 p-2.5 flex items-center justify-center">
+                    <ProjectIcons iconName={selectedProject.icon} />
+                  </div>
+                  <div>
+                    <h2 class="text-xl font-semibold text-gray-800">{selectedProject.name}</h2>
+                    <p class="text-sm text-gray-600">{selectedProject.shortDescription}</p>
+                  </div>
+                </div>
+                <ProjectActions project={selectedProject} />
+              </div>
+            </div>
+            <div class="markdown-body prose prose-sm max-w-none p-6" in:fade={{ duration: 200 }}>
               <SvelteMarkdown source={readmeContent} {renderers} />
             </div>
           {/if}
@@ -139,12 +186,50 @@
     min-width: 200px;
     max-width: 980px;
     margin: 0 auto;
-    padding: 45px;
   }
 
-  @media (max-width: 767px) {
-    :global(.markdown-body) {
-      padding: 15px;
-    }
+  :global(.markdown-body pre) {
+    background-color: #f6f8fa !important;
+    border-radius: 0.75rem !important;
+  }
+
+  :global(.markdown-body h1) {
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #eaecef;
+    margin-bottom: 16px;
+  }
+
+  :global(.markdown-body h2) {
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid #eaecef;
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  :global(.markdown-body ul) {
+    margin-bottom: 16px;
+  }
+
+  :global(.markdown-body li) {
+    margin: 0.25em 0;
+  }
+
+  /* Custom scrollbar */
+  :global(::-webkit-scrollbar) {
+    width: 6px;
+    height: 6px;
+  }
+
+  :global(::-webkit-scrollbar-track) {
+    background: transparent;
+  }
+
+  :global(::-webkit-scrollbar-thumb) {
+    background: #94a3b8;
+    border-radius: 3px;
+  }
+
+  :global(::-webkit-scrollbar-thumb:hover) {
+    background: #64748b;
   }
 </style>

@@ -1,6 +1,13 @@
 <script lang="ts">
   import TopBar from "./TopBar.svelte";
   import MusicPlayer from "./MusicPlayer.svelte";
+  import Terminal from "./Terminal.svelte";
+  import Safari from "./Safari.svelte";
+  import Photos from "./Photos.svelte";
+  import Blog from "./Blog.svelte";
+  import Projects from "./Projects.svelte";
+  import Window from "./Window.svelte";
+  import { windows } from "../stores/windowStore";
   import { onMount } from "svelte";
 
   let currentTime = new Date();
@@ -44,6 +51,31 @@
     <!-- Music Player Widget -->
     <MusicPlayer />
   </div>
+
+  <!-- Windows -->
+  {#each $windows as window (window.id)}
+    <Window
+      id={window.id}
+      type={window.type}
+      position={window.position}
+      size={window.size}
+      minimized={window.minimized}
+      maximized={window.maximized}
+      zIndex={window.zIndex}
+    >
+      {#if window.type === 'terminal'}
+        <Terminal />
+      {:else if window.type === 'safari'}
+        <Safari />
+      {:else if window.type === 'photos'}
+        <Photos />
+      {:else if window.type === 'blog'}
+        <Blog />
+      {:else if window.type === 'projects'}
+        <Projects />
+      {/if}
+    </Window>
+  {/each}
 </div>
 
 <style>

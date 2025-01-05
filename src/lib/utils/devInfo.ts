@@ -10,11 +10,11 @@ export interface Developer {
   ides: string[];
 }
 
-export const ansxuman: Developer = {
-  // name: "Anshuman",
+export const yassin: Developer = {
+  // name: "Yassin",
   // role: "Product Engineer",
   // company: "InstaSafe",
-  about: "Hey, I'm Anshuman, a Software Developer with a keen interest in building scalable \nand secure applications.Always eager to learn and experiment with new technologies.",
+  about: "Hey, I'm Yassin, a Software Developer with a keen interest in building scalable \nand secure applications.Always eager to learn and experiment with new technologies.",
   code: ["Golang", "Svelte", "Angular", "TS", "JS", "Java", "Swift", "Rust", "Python"],
   interests: [
     "Full-Stack Development",

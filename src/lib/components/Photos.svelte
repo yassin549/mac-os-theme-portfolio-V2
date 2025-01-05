@@ -69,7 +69,7 @@
       : photos.filter(photo => photo.album === currentAlbum);
 
   function openCloud() {
-    const url = 'https://www.pexels.com/@ansxuman/';
+    const url = 'https://www.pexels.com/@yassin549/';
     if (typeof window !== 'undefined') {
       window.open(url, '_blank');
     }

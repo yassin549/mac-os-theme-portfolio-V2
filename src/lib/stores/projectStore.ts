@@ -1,57 +1,65 @@
 import { writable } from 'svelte/store';
 import type { ProjectData } from '../types/projectType';
 
-const initialProjects: ProjectData[] = [
-  {
-    id: 'Clave',
-    name: 'Clave',
-    icon: 'wails',
-    shortDescription: 'A lightweight cross-platform desktop authenticator app',
-    githubUrl: 'https://github.com/ansxuman/clave',
-    readmeUrl: 'https://raw.githubusercontent.com/ansxuman/clave/main/README.md',
-    technologies: ['Go','Wails','Svelte', 'TypeScript', 'TailwindCSS'],
-    type: 'application'
-  },
-  {
-    id: 'macOS-Themed-Portfolio',
-    name: 'macOS Themed Portfolio',
-    icon: 'svelte',
-    shortDescription: 'An interactive portfolio website inspired by the macOS interface, built with SvelteKit, TailwindCSS, and TypeScript.',
-    githubUrl: 'https://github.com/ansxuman/macOS-Themed-Portfolio',
-    readmeUrl: 'https://raw.githubusercontent.com/ansxuman/macOS-Themed-Portfolio/main/README.md',
-    technologies: ['Svelte', 'TypeScript', 'TailwindCSS'],
-    type: 'application'
-  },
-  {
-    id: 'go-service',
-    name: 'Go Service',
-    icon: 'go',
-    shortDescription: 'A minimal boilerplate for building cross-platform system services in Go',
-    githubUrl: 'https://github.com/ansxuman/go-service',
-    readmeUrl: 'https://raw.githubusercontent.com/ansxuman/go-service/main/README.md',
-    technologies: ['Go'],
-    type: 'library'
-  },
-  {
-    id: 'go-touchid',
-    name: 'Go TouchID',
-    icon: 'go',
-    shortDescription: 'A simple Go Library for Touch ID authentication on darwin.',
-    githubUrl: 'https://github.com/ansxuman/go-touchid',
-    readmeUrl: 'https://raw.githubusercontent.com/ansxuman/go-touchid/main/README.md',
-    technologies: ['Go', 'macOS', 'TouchID'],
-    type: 'library'
-  },
-  {
-    id: 'go-version-compare',
-    name: 'Go Version Compare',
-    icon: 'go',
-    shortDescription: 'Go Library for Version Comparison',
-    githubUrl: 'https://github.com/ansxuman/versioncompare',
-    readmeUrl: 'https://raw.githubusercontent.com/ansxuman/versioncompare/main/README.md',
-    technologies: ['Go'],
-    type: 'library'
-  },
-];
+type ProjectStore = {
+  [key: string]: ProjectData;
+};
 
-export const projects = writable<ProjectData[]>(initialProjects);
+const initialProjects: ProjectStore = {
+  'academia-campus': {
+    name: 'Academia Campus Repository',
+    icon: 'javascript',
+    shortDescription: 'A comprehensive academic management system with course materials, assignments, and student resources',
+    githubUrl: 'https://github.com/yassin549/Academia-Campus-Repository-main',
+    readmeUrl: '/project-descriptions/academia-campus',
+    technologies: ['JavaScript', 'Node.js', 'Express', 'MongoDB', 'React'],
+    type: 'application'
+  },
+  'ai-chatbot': {
+    name: 'AI Room Booking Chatbot',
+    icon: 'python',
+    shortDescription: 'Intelligent chatbot using IBM Watson for automated room booking and management',
+    githubUrl: 'https://github.com/yassin549/AI-Room-Booking-Chatbot-IBM-WATSON',
+    readmeUrl: '/project-descriptions/ai-chatbot',
+    technologies: ['Python', 'IBM Watson', 'Flask', 'Natural Language Processing', 'RESTful APIs'],
+    type: 'application'
+  },
+  'ecommerce': {
+    name: 'E-commerce Platform',
+    icon: 'python',
+    shortDescription: 'Full-featured e-commerce platform with product management, shopping cart, and payment integration',
+    githubUrl: 'https://github.com/yassin549/EcommerceProject',
+    readmeUrl: '/project-descriptions/ecommerce',
+    technologies: ['Python', 'Django', 'PostgreSQL', 'Bootstrap', 'Payment Gateway Integration'],
+    type: 'application'
+  },
+  'event-manager': {
+    name: 'Event Manager',
+    icon: 'javascript',
+    shortDescription: 'Comprehensive event management system with scheduling, registration, and analytics',
+    githubUrl: 'https://github.com/yassin549/eventmanager',
+    readmeUrl: '/project-descriptions/event-manager',
+    technologies: ['JavaScript', 'React', 'Node.js', 'Express', 'MongoDB'],
+    type: 'application'
+  },
+  'social-media': {
+    name: 'Social Media Web App',
+    icon: 'javascript',
+    shortDescription: 'Feature-rich social networking platform with real-time chat, post sharing, and user interactions',
+    githubUrl: 'https://github.com/yassin549/SocialMediaWebApp',
+    readmeUrl: '/project-descriptions/social-media',
+    technologies: ['React', 'Node.js', 'Socket.io', 'MongoDB', 'Redux', 'WebRTC'],
+    type: 'application'
+  },
+  'smart-inventory': {
+    name: 'Smart Inventory System',
+    icon: 'python',
+    shortDescription: 'Intelligent inventory management system with predictive analytics and real-time tracking',
+    githubUrl: 'https://github.com/yassin549/Smart-Inventory-System',
+    readmeUrl: '/project-descriptions/smart-inventory',
+    technologies: ['Python', 'Machine Learning', 'SQLite', 'Data Visualization', 'Predictive Analytics'],
+    type: 'application'
+  }
+};
+
+export const projects = writable<ProjectStore>(initialProjects);

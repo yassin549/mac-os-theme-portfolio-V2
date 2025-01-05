@@ -9,8 +9,8 @@ export function syncProjectsToFileSystem(fileSystem: FileSystem): void {
     fileSystem.home.projects = {};
   }
 
-  projectsList.forEach(project => {
-    (fileSystem.home.projects as FileSystem)[project.id] = `
+  Object.entries(projectsList).forEach(([id, project]) => {
+    (fileSystem.home.projects as FileSystem)[id] = `
 Name: ${project.name}
 Type: ${project.type}
 Description: ${project.shortDescription}

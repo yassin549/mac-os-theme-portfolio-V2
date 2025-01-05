@@ -1,0 +1,11 @@
+{
+	"/": [
+		"src/routes/+page.ts"
+	],
+	"/api/blog-posts": [
+		"src/routes/api/blog-posts/+server.ts"
+	],
+	"/project-descriptions/[slug]": [
+		"src/routes/project-descriptions/[slug]/+server.ts"
+	]
+}

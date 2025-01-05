@@ -4,10 +4,24 @@ import type { wType } from '../types/wType';
 export const windows = writable<wType[]>([]);
 let nextZIndex = 1;
 
-export function addWindow(type: "terminal" | "safari" | "photos" | "blog" | "projects" | "github") {
+const initialWindows: wType[] = [
+  {
+    id: 'technews',
+    type: 'technews',
+    minimized: false,
+    maximized: false,
+    position: { x: 250, y: 150 },
+    size: { width: 800, height: 600 },
+    zIndex: 0,
+  },
+];
+
+windows.set(initialWindows);
+
+export function addWindow(type: "terminal" | "safari" | "photos" | "blog" | "projects" | "github" | "technews") {
 
   if (type === "github") {
-    window.open('https://github.com/ansxuman', '_blank');
+    window.open('https://github.com/yassin549', '_blank');
     return;
   }
 
@@ -92,12 +106,12 @@ export function toggleMaximize(id: string) {
   );
 }
 
-export function isAppRunning(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects'): boolean {
+export function isAppRunning(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects' | 'technews'): boolean {
   const currentWindows = get(windows);
   return currentWindows.some(w => w.type === type && !w.minimized);
 }
 
-export function isAppMinimized(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects'): boolean {
+export function isAppMinimized(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects' | 'technews'): boolean {
   const currentWindows = get(windows);
   return currentWindows.some(w => w.type === type && w.minimized);
 }
