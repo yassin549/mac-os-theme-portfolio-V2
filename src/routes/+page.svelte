@@ -7,10 +7,19 @@
   import { fade, fly } from 'svelte/transition';
   import { backOut } from 'svelte/easing';
   import { browser } from '$app/environment';
+  import { windows, addWindow } from '$lib/stores/windowStore';
 
   let loading = true;
   let mounted = false;
   let showContent = false;
+
+  function isAppRunning(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects') {
+    return $windows.some(w => w.type === type && !w.minimized);
+  }
+
+  function isAppMinimized(type: 'terminal' | 'safari' | 'photos' | 'blog' | 'projects') {
+    return $windows.some(w => w.type === type && w.minimized);
+  }
 
   // Preload critical components
   const preloadComponents = async () => {
@@ -74,7 +83,11 @@
 
     {#if showContent}
       <div in:fly={{ y: 20, duration: 500, delay: 400 }}>
-        <Dock />
+        <Dock 
+          {isAppRunning}
+          {isAppMinimized}
+          {addWindow}
+        />
       </div>
     {/if}
   {/if}
